@@ -30,15 +30,20 @@ const loginAuthor = async function (req, res) {
         if (!authorDetails)
             res.status(404).send({ status: false, msg: "email & password not matched" })
 
-            let token = jwt.sign({ authorId: authorDetails._id.toString(),
-            batch:"thorium",
-            project: "Phase 2",
+            let secret = 'secret';
+            let token = jwt.sign({
+                authorId: authorDetails._id.toString(),
+                batch:"thorium",
+                project: "Phase 2",
+         },
+         secret, {
+             expiresIn: "1hr"
          },
           "Thorium Phase2"
           );
             res.setHeader("x-api-key", token);
             res.status(201).send({ status: true, data: token })
-        
+       
     }
     catch (error) {
         console.log(error)
