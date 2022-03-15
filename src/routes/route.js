@@ -8,9 +8,9 @@ const auth = require("../middleware/auth")
 // Phase 1
 router.post("/authors", authorController.createAuthor)
 
-// router.post("/blogs", blogController.createBlogs)
+// router.post("/blogs", blogController.createBlog)
 
-// router.get("/blogs", blogController.getBlog)
+// router.get("/blogs", blogController.getBlogs)
 
 // router.put("/blogs/:blogId", blogController.updateBlog)
 
@@ -22,14 +22,14 @@ router.post("/authors", authorController.createAuthor)
 // Phase 2
 router.post("/login", authorController.loginAuthor)
 
-router.post("/blogs/:authorId", auth.authenticate, auth.authorise, blogController.createBlogs)
+router.post("/blogs/:authorId", auth.authenticate, auth.authorise, blogController.createBlog)
 
-router.get("/blogs/:authorId", auth.authenticate, auth.authorise, blogController.getBlog)
+router.get("/blogs", auth.authenticate, auth.authorise, blogController.getBlogs)
 
 router.put("/blogs/:blogId", auth.authenticate, blogController.updateBlog)
 
-router.delete("/blogs/:blogId", auth.authenticate, blogController.deleteBlog)
+router.delete("/blogs/:blogsId", auth.authenticate, blogController.deleteBlog)
 
-router.delete("/blogs", auth.authenticate, blogController.deleteBlogQuery)
+router.delete("/blogs", auth.authorise, blogController.deleteBlogQuery)
 
 module.exports = router;
