@@ -117,24 +117,14 @@ const deleteBlog = async function (req, res) {
 
 const deleteBlogQuery = async function (req, res) {
     try {
-        const category = req.query.category;
-        const authorId = req.query.authorId;
-        const tags = req.query.tags;
-        const subcategory = req.query.subcategory;
-        const isPublished = req.query.isPublished;
-        
-        // delete blog documents
-        const deleted = await blogModel.find({ $or: [ { authorId: authorId }, { category: category }, { tag: tags }, { subcategory: subcategory }, { unpublished: isPublished }],}).select({ isDeleted: 1 });
-
-        if (deleted === false) {
-            const Deleted = await deleted.updateMany( { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true });
-            res.status(200).send({ status: true, data: Deleted });
-        }
-        else if (deleted === true) {
-            res.status(404).send("blog documents are deleted") 
-        }
-
-    }
+        let input = req.query
+        if(Object.keys(input).length == 0) return res.status(400).send({status: false, msg: "please provide input" })
+    
+            let deletedBlogs = await blogModel.updateMany({ $and: [input, { isDeleted: false }] }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+            
+            res.status(200).send({status:true})
+    
+        } 
     catch (err) {
         console.log("This is the error :", err.message)
         res.status(500).send({ msg: "Error", error: err.message })
