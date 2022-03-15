@@ -59,25 +59,20 @@ const updateBlog = async function (req,res) {
     try{ 
         // To validate blog Id is present in request params
         let blogId = req.params.blogId
-        if (!blogId) 
-        res.status(400).send({ status: false, msg: "blogId must be present" })
-
+        if (!blogId) {
+            res.status(400).send({ status: false, msg: "blogId must be present" })
+        }
         //To validate blogId is valid
-        let blog = await blogModel.findById(blogId)
+        let blog = await blogModel.find({ _id:blogId})
         if (!blog)
-        res.status(404).send({ status: false, msg: "blog does not exists" })
-
-        //If blogId exists
-        let isDeleted = Object.keys(blog).find(isDeleted => blog[isDeleted] === true)
-        if (isDeleted == true)
-        res.status(404).send({ status: false, msg: "blog is deleted" })
+        res.status(404).send({ status: false, msg: "blogId does not exists" })
 
         //Updates a blog by changing the its title, body, adding tags, adding a subcategory.
         let title = req.body.title
         let body = req.body.body
         let tags = req.body.tags
         let subcategory = req.body.subcategory
-        let updatedBlog = await blogModel.findOneAndUpdate({ _id: blogId }, {$set: { title: title, body: body, isPublished: true,  tags: tags, subcategory: subcategory}}, { new: true })
+        let updatedBlog = await blogModel.updateMany({ _id: blogId }, {$set: { title: title, body: body, isPublished: true,  tags: tags, subcategory: subcategory}}, { new: true })
         
         //Sending the updated response
         res.status(200).send({ status: true, data: updatedBlog })
@@ -102,11 +97,11 @@ const deleteBlog = async function (req, res) {
 
         //If the blogId is not deleted
         let isDeleted = Object.keys(blog).find(isDeleted => blog[isDeleted] === true)
-        if (isDeleted === true)
+        if (blog[isDeleted] === true)
         res.status(404).send({ status: false, msg: "Blog is deleted" })
 
         //If blogId exist, mark the blog as deleted (isDeleted: true)
-        let deletedBlog = await blogModel.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+        let deletedBlog = await blogModel.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true} }, { new: true })
         res.status(200).send({ status: true, data: deletedBlog })
     }
     catch (err) {
@@ -118,12 +113,12 @@ const deleteBlog = async function (req, res) {
 const deleteBlogQuery = async function (req, res) {
     try {
         let input = req.query
-        if(Object.keys(input).length == 0) return res.status(400).send({status: false, msg: "please provide input" })
+        if(Object.keys(input).length == 0)
+        res.status(400).send({status: false, msg: "please provide input" })
     
-            let deletedBlogs = await blogModel.updateMany({ $and: [input, { isDeleted: false }] }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
+        let deletedBlogs = await blogModel.updateMany({ $and: [input, { isDeleted: false }] }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true })
             
-            res.status(200).send({status:true})
-    
+            res.status(200).send({status:true, msg: "Deleted blog"})    
         } 
     catch (err) {
         console.log("This is the error :", err.message)
