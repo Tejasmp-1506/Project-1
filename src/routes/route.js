@@ -22,14 +22,14 @@ router.post("/authors", authorController.createAuthor)
 // Phase 2
 router.post("/login", authorController.loginAuthor)
 
-router.post("/blogs/:authorId", auth.authenticate, auth.authorise, blogController.createBlog)
+router.post("/blogs", auth.authenticate, blogController.createBlog)
 
-router.get("/blogs", auth.authenticate, auth.authorise, blogController.getBlogs)
+router.get("/blogs", auth.authenticate, blogController.getBlogs)
 
 router.put("/blogs/:blogId", auth.authenticate, blogController.updateBlog)
 
-router.delete("/blogs/:blogsId", auth.authenticate, blogController.deleteBlog)
+router.delete("/blogs/:blogId", auth.authenticate, auth.authorise, blogController.deleteBlog)
 
-router.delete("/blogs", auth.authorise, blogController.deleteBlogQuery)
+router.delete("/blogs", auth.authenticate, blogController.deleteBlogQuery)
 
 module.exports = router;

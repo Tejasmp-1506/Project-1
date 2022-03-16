@@ -1,38 +1,36 @@
 const jwt = require("jsonwebtoken");
+const blogModel = require("../models/blogModel")
 
-let authenticate= function (req,res,next){
-    try {
-        let token = req.headers["x-api-key"]
-        if (!token) {
-            res.status(401).send({ status: false, msg: " token must be present" })
-        }
 
-        let decodedToken = jwt.verify(token, "Phase2-thorium")
-        if (!decodedToken) {
-            return res.status(401).status({ status: false, msg: "token is invalid" })
-        }
+let authenticate= async function (req,res,next){
+    try{
+        let token = req.headers['x-api-key']
+        if(!token) return res.status(400).send({status: false, msg: "please provide token" })
+        let validateToken = jwt.verify(token, "group39")
+        if(!validateToken) return res.status(401).send({status: false, msg: "authentication failed"})
+        
+        // req['x-api-key'] = token
         next()
-    }
+    } 
     catch (err) {
         console.log("This is the error :", err.message)
         res.status(500).send({ msg: "Error", error: err.message })
     }
     }
 
-    let authorise= function (req,res,next){
-        try{
-            let authorId=req.params.authorId
-            let token = req.headers["x-api-key"]
-            if(!authorId) {
-                res.status(400).send({status: false, msg: " authorId is required, BAD REQUEST"})
-            }
-    
-            let decodedToken = jwt.verify(token, "Phase2-thorium")
-            if(decodedToken.authorId != authorId){
-                return res.status(403).send({status:false,msg:"you are not authorized"})
-            }
-            next()
-        }
+    let authorise= async function (req,res,next){
+        let id = req.params.blogId
+        let jwtToken = req.headers['x-api-key']
+    try{
+        let blogs = await blogModel.findById(id)
+        if(!blogs) return res.status(404).send({status: false, msg: "please provide valid blog ID"})
+        if(blogs.isDeleted == true) return res.status(404).send({status: false, msg: "no such blog found"})
+  
+        let verifiedToken = jwt.verify(jwtToken, "group39")
+        if(verifiedToken.authorId != blogs.authorId) return  res.status(403).send({status: false, msg: "unauthorize access "})
+
+        next()
+    }
         catch (err) {
             console.log("This is the error :", err.message)
             res.status(500).send({ msg: "Error", error: err.message })

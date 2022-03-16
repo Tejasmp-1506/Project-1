@@ -19,31 +19,22 @@ const createAuthor = async function (req, res) {
 
 }
 
-const loginAuthor = async function (req, res) {
-    try {
-        let email = req.body.email
-        let password = req.body.password
-        if (!(email && password)) {
-            res.status(400).send({ status: false, msg: "email & password is required, BAD REQUEST" })
-        }
-        let authorDetails = await authorModel.findOne({ email: email, password: password })
-        if (!authorDetails)
-            res.status(404).send({ status: false, msg: "email & password not matched" })
+const loginAuthor = async function (req, res){
+    try{
+        let username = req.body.email
+        let pass = req.body.password
 
-            let secret = 'secret';
-            let token = jwt.sign({
-                authorId: authorDetails._id.toString(),
-                batch:"thorium",
-                project: "Phase 2",
-         },
-         secret, {
-             expiresIn: "1hr"
-         },
-          "Thorium Phase2"
-          );
-            res.setHeader("x-api-key", token);
-            res.status(201).send({ status: true, data: token })
-       
+        if(username && pass){
+            let author = await authorModel.findOne({email : username, password: pass})
+            if(!author) return res.status(404).send({status: false, msg: "please provide valid username or password"})
+            let payLoad = {authorId : author._id}
+            let secret = "group39"
+            let token = jwt.sign(payLoad, secret )
+            res.status(200).send({status: true, data: token})
+
+        }else{
+            res.status(400).send({status: false, msg: "Please provide username and password"})
+        }
     }
     catch (error) {
         console.log(error)
